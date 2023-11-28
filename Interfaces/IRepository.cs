@@ -2,6 +2,7 @@
 {
     public interface IRepository
     {
-        void PlaySound(int soundId);
+        void PlaySoundById(int soundId);
+        List<string?> GetSoundsNames();
     }
 }

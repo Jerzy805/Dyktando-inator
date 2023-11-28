@@ -20,10 +20,17 @@ namespace Dictations
         {
             if (int.TryParse(IndexInput.Text, out int index))
             {
-                repository.PlaySound(index);
+                repository.PlaySoundById(index);
 
                 IndexInput.Text = string.Empty;
             }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var list = repository.GetSoundsNames();
+
+            MessageBox.Show(list.First());
         }
     }
 }

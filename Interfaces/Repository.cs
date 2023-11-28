@@ -4,9 +4,31 @@ namespace Dictations.Interfaces
 {
     public class Repository : IRepository
     {
-        public void PlaySound(int soundId)
+        private string GetDir()
         {
-            var soundDir = $"{Directory.GetCurrentDirectory()}/records/{soundId}.wav";
+            return $"{Directory.GetCurrentDirectory()}/records";
+        }
+
+        public void PlaySoundById(int id)
+        {
+            //var soundDir = $"{GetDir()}/{id}.wav";
+
+            var soundsNames = GetSoundsNames();
+
+            var soundDir = string.Empty;
+
+            foreach (var soundName in soundsNames)
+            {
+                var index = soundName!.IndexOf('(');
+
+                var soundId = int.Parse(soundName!.Substring(0, index));
+
+                if (soundId == id)
+                {
+                    soundDir = $"{GetDir()}/{soundName}";
+                    break;
+                }
+            }
 
             if (!File.Exists(soundDir))
             {
@@ -17,5 +39,15 @@ namespace Dictations.Interfaces
             var player = new SoundPlayer(soundDir);
             player.Play();
         }
+
+        public List<string?> GetSoundsNames()
+        {
+            var directory = GetDir();
+
+            var files = Directory.GetFiles(directory).Select(Path.GetFileName).ToList();
+
+            return files;
+        }
+
     }
 }
