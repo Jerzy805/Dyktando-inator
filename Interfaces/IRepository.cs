@@ -1,8 +1,12 @@
-﻿namespace Dictations.Interfaces
+﻿using Dictations.Models;
+
+namespace Dictations.Interfaces
 {
     public interface IRepository
     {
-        void PlaySoundById(int soundId);
+        string PlaySoundById(int soundId);
         List<string?> GetSoundsNames();
+        Result GetBestResult();
+        Task SaveBestResult(Result bestResultInSeconds);
     }
 }
