@@ -58,11 +58,12 @@
             // 
             SoundInput.Font = new Font("Segoe UI", 14F);
             SoundInput.Location = new Point(330, 68);
-            SoundInput.MaxLength = 3;
+            SoundInput.MaxLength = 5;
             SoundInput.Name = "SoundInput";
             SoundInput.PlaceholderText = "Dźwięk";
             SoundInput.Size = new Size(84, 32);
             SoundInput.TabIndex = 3;
+            SoundInput.KeyDown += SoundInput_KeyDown;
             // 
             // CheckButton
             // 
@@ -89,7 +90,7 @@
             // 
             SoundNameDisplay.AutoSize = true;
             SoundNameDisplay.Font = new Font("Segoe UI", 40F);
-            SoundNameDisplay.Location = new Point(340, -7);
+            SoundNameDisplay.Location = new Point(339, -7);
             SoundNameDisplay.Name = "SoundNameDisplay";
             SoundNameDisplay.Size = new Size(65, 72);
             SoundNameDisplay.TabIndex = 6;

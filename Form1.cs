@@ -27,6 +27,9 @@ namespace Dictations
 
             this.KeyDown += KeyBinding!;
 
+            SoundNameDisplay.TextAlign = ContentAlignment.MiddleCenter;
+            //SoundNameDisplay.TextChanged += OnTest;
+
             repository = new Repository();
 
             helper = new Helper();
@@ -106,7 +109,12 @@ namespace Dictations
             timer.Start();
         }
 
-        private async void OnCheck(object sender, EventArgs e)
+        private void OnCheck(object sender, EventArgs e)
+        {
+            CheckHelper();
+        }
+
+        private async void CheckHelper()
         {
             SoundInput.Focus();
 
@@ -181,6 +189,8 @@ namespace Dictations
             {
                 repository.PlaySoundById(21);
             }
+
+            SoundInput.Focus();
         }
 
         private void KeyBinding(object sender, KeyEventArgs e)
@@ -289,6 +299,17 @@ namespace Dictations
         private void SetLostPointsLabel()
         {
             LostPointsLabel.Text = $"Stracone punkty: {lostPoints}";
+        }
+
+        private void SoundInput_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Enter)
+            {
+                return;
+            }
+
+            CheckHelper();
+            e.SuppressKeyPress = true;
         }
     }
 }
