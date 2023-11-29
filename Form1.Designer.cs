@@ -40,6 +40,7 @@
             BestResultLabel = new Label();
             TimesInput = new TextBox();
             HowPointsWork = new Label();
+            label1 = new Label();
             SuspendLayout();
             // 
             // PlayButton
@@ -150,7 +151,7 @@
             // TimesInput
             // 
             TimesInput.Font = new Font("Segoe UI", 14F);
-            TimesInput.Location = new Point(455, 27);
+            TimesInput.Location = new Point(31, 145);
             TimesInput.Name = "TimesInput";
             TimesInput.PlaceholderText = "Liczba";
             TimesInput.Size = new Size(75, 32);
@@ -166,11 +167,22 @@
             HowPointsWork.TabIndex = 13;
             HowPointsWork.Text = "Punktacja: od zdobytych punktów odejmowane są stracone punkty";
             // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 16F);
+            label1.Location = new Point(12, 112);
+            label1.Name = "label1";
+            label1.Size = new Size(174, 30);
+            label1.TabIndex = 14;
+            label1.Text = "Liczba dźwięków";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(label1);
             Controls.Add(HowPointsWork);
             Controls.Add(TimesInput);
             Controls.Add(BestResultLabel);
@@ -204,5 +216,6 @@
         private Label BestResultLabel;
         private TextBox TimesInput;
         private Label HowPointsWork;
+        private Label label1;
     }
 }
