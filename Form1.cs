@@ -1,3 +1,5 @@
+using System.Net.WebSockets;
+
 using Dictations.Interfaces;
 using Dictations.Models;
 
@@ -8,6 +10,7 @@ namespace Dictations
         private readonly IRepository repository;
         private readonly IHelper helper;
         private string soundName;
+        private string interval;
         private int wonPoints;
         private int lostPoints;
         private bool isAnswered;
@@ -16,6 +19,7 @@ namespace Dictations
         private System.Timers.Timer timer;
         private int elapsedSeconds = 0;
         private int elapsedMinuts = 0;
+        private int firstId, secondId;
 
         public Form1()
         {
@@ -34,12 +38,12 @@ namespace Dictations
             helper = new Helper();
 
             soundName = string.Empty;
+            interval = string.Empty;
 
             wonPoints = 0;
             lostPoints = 0;
 
             SetPointsLabel();
-            SetLostPointsLabel();
 
             isAnswered = true;
 
@@ -53,17 +57,26 @@ namespace Dictations
             PlayA.BackColor = Color.Red;
 
             CheckButton.Enabled = false;
-            Replay.Enabled = false;
+            ReplaySound.Enabled = false;
+            CheckInterval.Enabled = false;
+            ReplayInterval.Enabled = false;
+            IntervalInput.Enabled = false;
 
-            var bestResult = repository.GetBestResult();
+            var bestResult = repository.GetBestResult(2);
 
-            FormatBestResult(bestResult);
+            FormatBestResult(bestResult, 1);
+
+            var intervalsBestResult = repository.GetBestResult(3);
+
+            FormatBestResult(intervalsBestResult, 2);
 
             TimesInput.Text = "10";
 
             FinalPointsLabel.Text = string.Empty;
 
             SetGameMode(true);
+
+            IntervalDisplay.Text = "?";
         }
 
         private void TimerElapsed(object sender, EventArgs e)
@@ -95,7 +108,7 @@ namespace Dictations
         {
             PlaySoundButton.Enabled = false;
             CheckButton.Enabled = true;
-            Replay.Enabled = true;
+            ReplaySound.Enabled = true;
             SoundInput.Enabled = true;
 
             if (int.TryParse(TimesInput.Text, out int times))
@@ -114,6 +127,11 @@ namespace Dictations
             PlaySound();
 
             timer.Start();
+
+            ChangeGameModeButton.Enabled = false;
+
+            SoundNameDisplay.Text = "?";
+            SoundNameDisplay.ForeColor = DefaultForeColor;
         }
 
         private void OnCheck(object sender, EventArgs e)
@@ -143,27 +161,29 @@ namespace Dictations
 
                 var points = wonPoints - lostPoints;
 
-                var alertText = $"Koniec gry. Wynik: {points}. Czas: {Timer.Text}";
-
                 FinalPointsLabel.Text = $"Wynik: {points}";
 
                 var currentSeconds = GetResultInSeconds(elapsedMinuts, elapsedSeconds);
 
                 var currentResult = new Result(currentSeconds, points);
 
-                var currentBestResult = repository.GetBestResult();
+                var currentBestResult = repository.GetBestResult(2);
+
+                ChangeGameModeButton.Enabled = true;
+
+                var isRecord = false;
 
                 if (currentBestResult.Points == 0 || currentResult.Points >= currentBestResult.Points)
                 {
-                    alertText += " Nowy rekord!";
+                    isRecord = true;
                     currentBestResult = currentResult;
 
-                    await repository.SaveBestResult(currentResult);
+                    await repository.SaveBestResult(currentResult, 2);
                 }
 
-                FormatBestResult(currentBestResult);
+                FormatBestResult(currentBestResult, 1);
 
-                MessageBox.Show(alertText, "Dyktando-inator");
+                EndAlert(isRecord);
 
                 SoundInput.Enabled = false;
 
@@ -178,8 +198,22 @@ namespace Dictations
 
                 PlaySoundButton.Enabled = true;
                 CheckButton.Enabled = false;
-                Replay.Enabled = false;
+                ReplaySound.Enabled = false;
             }
+        }
+
+        private void EndAlert(bool isRecord)
+        {
+            var points = wonPoints - lostPoints;
+
+            var alertText = $"Koniec gry. Wynik: {points}. Czas: {Timer.Text}";
+
+            if (isRecord)
+            {
+                alertText += " Nowy rekord!";
+            }
+
+            MessageBox.Show(alertText, "Dyktando-inator");
         }
 
         private int GetResultInSeconds(int minuts, int seconds)
@@ -191,7 +225,7 @@ namespace Dictations
         {
             var button = sender as Button;
 
-            if (button!.Name == Replay.Name)
+            if (button!.Name == ReplaySound.Name)
             {
                 repository.PlaySoundById(previousSoundId);
                 SoundInput.Focus();
@@ -214,11 +248,18 @@ namespace Dictations
             }
         }
 
-        private void FormatBestResult(Result result)
+        private void FormatBestResult(Result result, int option)
         {
             if (result.Seconds == 0)
             {
-                BestResultLabel.Text = string.Empty;
+                if (option == 1)
+                {
+                    BestSoundsResultLabel.Text = string.Empty;
+                }
+                else
+                {
+                    BestIntervalsResultLabel.Text = string.Empty;
+                }
                 return;
             }
 
@@ -237,7 +278,17 @@ namespace Dictations
                 seconds = $"0{result.Seconds}";
             }
 
-            BestResultLabel.Text = $"Rekord: {minuts}:{seconds}{Environment.NewLine}{result.Points} punktów";
+            var text = $"Rekord: {minuts}:{seconds}{Environment.NewLine}{result.Points} punktów";
+
+            if (option == 1)
+            {
+                BestSoundsResultLabel.Text = text;
+                return;
+            }
+            else
+            {
+                BestIntervalsResultLabel.Text = text;
+            }
         }
 
         private void PlaySound()
@@ -296,7 +347,6 @@ namespace Dictations
                 SoundNameDisplay.Text = first + soundName.Substring(1, soundName.Length - 1);
 
                 lostPoints++;
-                SetLostPointsLabel();
             }
 
             SoundInput.Text = string.Empty;
@@ -307,10 +357,6 @@ namespace Dictations
         private void SetPointsLabel()
         {
             PointsLabel.Text = $"Zdobyte punkty: {wonPoints}";
-        }
-
-        private void SetLostPointsLabel()
-        {
             LostPointsLabel.Text = $"Stracone punkty: {lostPoints}";
         }
 
@@ -340,21 +386,19 @@ namespace Dictations
 
         private void SetGameMode(bool isGuessing)
         {
-            //HowPointsWork.Visible = isGuessing;
-            //FinalPointsLabel.Visible = isGuessing;
-            //PointsLabel.Visible = isGuessing;
-            //LostPointsLabel.Visible = isGuessing;
-            //TimesInput.Visible = isGuessing;
             SoundNameDisplay.Visible = isGuessing;
             SoundInput.Visible = isGuessing;
             CheckButton.Visible = isGuessing;
             PlaySoundButton.Visible = isGuessing;
-            Replay.Visible = isGuessing;
-            PlayA.Visible = isGuessing;
-            BestResultLabel.Visible = isGuessing;
-            Timer.Visible = isGuessing;
+            ReplaySound.Visible = isGuessing;
+            BestSoundsResultLabel.Visible = isGuessing;
 
             IntervalInput.Visible = !isGuessing;
+            IntervalDisplay.Visible = !isGuessing;
+            StartIntervals.Visible = !isGuessing;
+            CheckInterval.Visible = !isGuessing;
+            ReplayInterval.Visible = !isGuessing;
+            BestIntervalsResultLabel.Visible = !isGuessing;
 
             if (isGuessing)
             {
@@ -378,6 +422,155 @@ namespace Dictations
                 SetGameMode(true);
                 ChangeGameModeButton.Text = "Interwa³y";
             }
+        }
+
+        private void OnStartIntervals(object sender, EventArgs e)
+        {
+            if (!isAnswered)
+            {
+                MessageBox.Show("Najpierw odpowiedz na pytanie.", "Dyktando-inator");
+                return;
+            }
+
+            StartIntervals.Enabled = false;
+            IntervalInput.Enabled = true;
+            CheckInterval.Enabled = true;
+            ReplayInterval.Enabled = true;
+
+            PlayInterval();
+
+            timer.Start();
+
+            if (int.TryParse(TimesInput.Text, out int times))
+            {
+                soundsLeft = times;
+            }
+
+            wonPoints = 0;
+            lostPoints = 0;
+
+            SetPointsLabel();
+
+            FinalPointsLabel.Text = string.Empty;
+        }
+
+        private async void PlayInterval()
+        {
+            IntervalInput.Focus();
+
+            var random = new Random();
+
+            firstId = random.Next(0, 37);
+
+            secondId = random.Next(0, 37);
+            interval = await repository.PlayIntervalById(firstId, secondId);
+            isAnswered = false;
+        }
+
+        private void OnCheckInterval(object sender, EventArgs e)
+        {
+            CheckIntervalHelper();
+        }
+
+        private async void CheckIntervalHelper()
+        {
+            var input = IntervalInput.Text.Trim();
+
+            if (input == string.Empty)
+            {
+                MessageBox.Show("Najpierw odpowiedz na pytanie.", "Dyktando-inator");
+                return;
+            }
+
+            var altName = string.Empty;
+
+            if (interval == "4<")
+            {
+                altName = "5>";
+            }
+
+            if (input == interval || input == altName)
+            {
+                IntervalDisplay.Text = input;
+                IntervalDisplay.ForeColor = Color.Green;
+                wonPoints++;
+            }
+            else
+            {
+                IntervalDisplay.ForeColor = Color.Red;
+                IntervalDisplay.Text = interval;
+                lostPoints++;
+            }
+
+            SetPointsLabel();
+
+            IntervalInput.Text = string.Empty;
+            isAnswered = true;
+
+            if (soundsLeft > 1)
+            {
+                PlayInterval();
+                soundsLeft--;
+            }
+            else
+            {
+                timer.Stop();
+
+                var points = wonPoints - lostPoints;
+                FinalPointsLabel.Text = $"Wynik: {points}";
+
+                var isRecord = false;
+
+                var seconds = GetResultInSeconds(elapsedMinuts, elapsedSeconds);
+
+                var currentResult = new Result(seconds, points);
+
+                var currentBestResult = repository.GetBestResult(3);
+
+                var isBetter = currentResult.Points == currentBestResult.Points && currentResult.Seconds <= currentBestResult.Seconds;
+
+                if (currentResult.Points > currentBestResult.Points || currentBestResult.Points == 0 || isBetter)
+                {
+                    isRecord = true;
+
+                    await repository.SaveBestResult(currentResult, 3);
+
+                    currentBestResult = currentResult;
+                }
+
+                FormatBestResult(currentBestResult, 2);
+
+                EndAlert(isRecord);
+            }
+        }
+
+        private void IntervalInputKeyDow(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                CheckIntervalHelper();
+                e.SuppressKeyPress = true;
+                return;
+            }
+
+            if (e.KeyCode == Keys.R)
+            {
+                ReplayIntervalHelper();
+                e.SuppressKeyPress = true;
+                return;
+            }
+
+            if (e.KeyCode == Keys.Q)
+            {
+                repository.PlaySoundById(21);
+                e.SuppressKeyPress= true;
+                return;
+            }
+        }
+
+        private void ReplayIntervalHelper()
+        {
+            repository.PlayIntervalById(firstId, secondId);
         }
     }
 }

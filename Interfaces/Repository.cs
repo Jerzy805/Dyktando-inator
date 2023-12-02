@@ -1,7 +1,5 @@
 ﻿using System.Media;
-
 using Dictations.Models;
-
 using Newtonsoft.Json;
 
 namespace Dictations.Interfaces
@@ -16,9 +14,13 @@ namespace Dictations.Interfaces
             {
                 currentDir += "/records";
             }
-            else
+            else if (choice == 2)
             {
                 currentDir += "/bestResult.json";
+            }
+            else
+            {
+                currentDir += "/intervalBestResult.json";
             }
 
             return currentDir;
@@ -65,6 +67,7 @@ namespace Dictations.Interfaces
 
             var player = new SoundPlayer(soundDir);
             player.Play();
+            player.Dispose();
             
             return name;
         }
@@ -78,9 +81,9 @@ namespace Dictations.Interfaces
             return files;
         }
 
-        public Result GetBestResult()
+        public Result GetBestResult(int option)
         {
-            var fileDir = GetDir(2);
+            var fileDir = GetDir(option);
 
             if (!File.Exists(fileDir))
             {
@@ -99,14 +102,20 @@ namespace Dictations.Interfaces
             }
         }
 
-        public async Task SaveBestResult(Result bestResult)
+        public async Task SaveBestResult(Result bestResult, int option)
         {
             var data = JsonConvert.SerializeObject(bestResult);
-            await File.WriteAllTextAsync(GetDir(2), data);
+            await File.WriteAllTextAsync(GetDir(option), data);
         }
 
-        public string PlayIntervalById(int firstSoundId, int secondSoundId)
+        public async Task<string> PlayIntervalById(int firstSoundId, int secondSoundId)
         {
+            PlaySoundById(firstSoundId);
+
+            await Task.Delay(2000);
+
+            PlaySoundById(secondSoundId);
+            
             var difference = Math.Abs(firstSoundId - secondSoundId);
 
             if (difference > 12)
