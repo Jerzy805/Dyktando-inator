@@ -28,7 +28,6 @@ namespace Dictations
             this.KeyDown += KeyBinding!;
 
             SoundNameDisplay.TextAlign = ContentAlignment.MiddleCenter;
-            //SoundNameDisplay.TextChanged += OnTest;
 
             repository = new Repository();
 
@@ -47,8 +46,9 @@ namespace Dictations
             soundsLeft = 10;
 
             SoundNameDisplay.Text = string.Empty;
-
             SoundNameDisplay.Text = "?";
+
+            SoundInput.Enabled = false;
 
             PlayA.BackColor = Color.Red;
 
@@ -60,6 +60,10 @@ namespace Dictations
             FormatBestResult(bestResult);
 
             TimesInput.Text = "10";
+
+            FinalPointsLabel.Text = string.Empty;
+
+            SetGameMode(true);
         }
 
         private void TimerElapsed(object sender, EventArgs e)
@@ -87,11 +91,12 @@ namespace Dictations
             Timer.Text = $"{elapsedMinuts}:{secondsToString}";
         }
 
-        private void OnPlay(object sender, EventArgs e)
+        private void OnStart(object sender, EventArgs e)
         {
-            PlayButton.Enabled = false;
+            PlaySoundButton.Enabled = false;
             CheckButton.Enabled = true;
             Replay.Enabled = true;
+            SoundInput.Enabled = true;
 
             if (int.TryParse(TimesInput.Text, out int times))
             {
@@ -103,6 +108,8 @@ namespace Dictations
             }
 
             SoundInput.Focus();
+
+            FinalPointsLabel.Text = string.Empty;
 
             PlaySound();
 
@@ -138,6 +145,8 @@ namespace Dictations
 
                 var alertText = $"Koniec gry. Wynik: {points}. Czas: {Timer.Text}";
 
+                FinalPointsLabel.Text = $"Wynik: {points}";
+
                 var currentSeconds = GetResultInSeconds(elapsedMinuts, elapsedSeconds);
 
                 var currentResult = new Result(currentSeconds, points);
@@ -155,6 +164,9 @@ namespace Dictations
                 FormatBestResult(currentBestResult);
 
                 MessageBox.Show(alertText, "Dyktando-inator");
+
+                SoundInput.Enabled = false;
+
                 soundsLeft = 10;
 
                 elapsedMinuts = 0;
@@ -164,7 +176,7 @@ namespace Dictations
 
                 SetTimer();
 
-                PlayButton.Enabled = true;
+                PlaySoundButton.Enabled = true;
                 CheckButton.Enabled = false;
                 Replay.Enabled = false;
             }
@@ -182,6 +194,7 @@ namespace Dictations
             if (button!.Name == Replay.Name)
             {
                 repository.PlaySoundById(previousSoundId);
+                SoundInput.Focus();
                 return;
             }
 
@@ -293,7 +306,7 @@ namespace Dictations
 
         private void SetPointsLabel()
         {
-            PointLabel.Text = $"Twoje punkty: {wonPoints}";
+            PointsLabel.Text = $"Zdobyte punkty: {wonPoints}";
         }
 
         private void SetLostPointsLabel()
@@ -303,13 +316,68 @@ namespace Dictations
 
         private void SoundInput_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode != Keys.Enter)
+            if (e.KeyCode == Keys.Enter)
             {
+                CheckHelper();
+                e.SuppressKeyPress = true;
                 return;
             }
 
-            CheckHelper();
-            e.SuppressKeyPress = true;
+            if (e.KeyCode == Keys.R)
+            {
+                repository.PlaySoundById(previousSoundId);
+                e.SuppressKeyPress = true;
+                return;
+            }
+
+            if (e.KeyCode == Keys.Q)
+            {
+                repository.PlaySoundById(21);
+                e.SuppressKeyPress = true;
+                return;
+            }
+        }
+
+        private void SetGameMode(bool isGuessing)
+        {
+            //HowPointsWork.Visible = isGuessing;
+            //FinalPointsLabel.Visible = isGuessing;
+            //PointsLabel.Visible = isGuessing;
+            //LostPointsLabel.Visible = isGuessing;
+            //TimesInput.Visible = isGuessing;
+            SoundNameDisplay.Visible = isGuessing;
+            SoundInput.Visible = isGuessing;
+            CheckButton.Visible = isGuessing;
+            PlaySoundButton.Visible = isGuessing;
+            Replay.Visible = isGuessing;
+            PlayA.Visible = isGuessing;
+            BestResultLabel.Visible = isGuessing;
+            Timer.Visible = isGuessing;
+
+            IntervalInput.Visible = !isGuessing;
+
+            if (isGuessing)
+            {
+                label1.Text = "Liczba dŸwiêków";
+            }
+            else
+            {
+                label1.Text = "Liczba interwa³ów";
+            }
+        }
+
+        private void OnChangeGameMode(object sender, EventArgs e)
+        {
+            if (ChangeGameModeButton.Text == "Interwa³y")
+            {
+                SetGameMode(false);
+                ChangeGameModeButton.Text = "DŸwiêki";
+            }
+            else
+            {
+                SetGameMode(true);
+                ChangeGameModeButton.Text = "Interwa³y";
+            }
         }
     }
 }

@@ -104,5 +104,52 @@ namespace Dictations.Interfaces
             var data = JsonConvert.SerializeObject(bestResult);
             await File.WriteAllTextAsync(GetDir(2), data);
         }
+
+        public string PlayIntervalById(int firstSoundId, int secondSoundId)
+        {
+            var difference = Math.Abs(firstSoundId - secondSoundId);
+
+            if (difference > 12)
+            {
+                difference -= 12;
+            }
+
+            var result = string.Empty;
+
+            switch (difference)
+            {
+                case 0:
+                case 2:
+                case 4:
+                    result = ((difference + 2) / 2).ToString();
+                    break;
+                case 1:
+                    result = "2>";
+                    break;
+                case 3:
+                    result = "3>";
+                    break;
+                case 5:
+                case 7:
+                case 9:
+                    result = ((difference + 3) / 2).ToString();
+                    break;
+                case 6:
+                    result = "4<";
+                    break;
+                case 8:
+                    result = "6>";
+                    break;
+                case 10:
+                case 12:
+                    result = ((difference + 4) / 2).ToString();
+                    break;
+                case 11:
+                    result = "7<";
+                    break;
+            }
+
+            return result;
+        }
     }
 }

@@ -8,5 +8,6 @@ namespace Dictations.Interfaces
         List<string?> GetSoundsNames();
         Result GetBestResult();
         Task SaveBestResult(Result bestResultInSeconds);
+        string PlayIntervalById(int firstSoundId, int secondSoundId);
     }
 }

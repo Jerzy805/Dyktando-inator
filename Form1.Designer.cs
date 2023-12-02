@@ -28,10 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
-            PlayButton = new Button();
+            PlaySoundButton = new Button();
             SoundInput = new TextBox();
             CheckButton = new Button();
-            PointLabel = new Label();
+            PointsLabel = new Label();
             SoundNameDisplay = new Label();
             LostPointsLabel = new Label();
             Replay = new Button();
@@ -41,18 +41,21 @@
             TimesInput = new TextBox();
             HowPointsWork = new Label();
             label1 = new Label();
+            FinalPointsLabel = new Label();
+            IntervalInput = new TextBox();
+            ChangeGameModeButton = new Button();
             SuspendLayout();
             // 
-            // PlayButton
+            // PlaySoundButton
             // 
-            PlayButton.Font = new Font("Segoe UI", 14F);
-            PlayButton.Location = new Point(264, 106);
-            PlayButton.Name = "PlayButton";
-            PlayButton.Size = new Size(102, 32);
-            PlayButton.TabIndex = 2;
-            PlayButton.Text = "Zagraj";
-            PlayButton.UseVisualStyleBackColor = true;
-            PlayButton.Click += OnPlay;
+            PlaySoundButton.Font = new Font("Segoe UI", 14F);
+            PlaySoundButton.Location = new Point(264, 106);
+            PlaySoundButton.Name = "PlaySoundButton";
+            PlaySoundButton.Size = new Size(102, 32);
+            PlaySoundButton.TabIndex = 2;
+            PlaySoundButton.Text = "Start";
+            PlaySoundButton.UseVisualStyleBackColor = true;
+            PlaySoundButton.Click += OnStart;
             // 
             // SoundInput
             // 
@@ -76,15 +79,15 @@
             CheckButton.UseVisualStyleBackColor = true;
             CheckButton.Click += OnCheck;
             // 
-            // PointLabel
+            // PointsLabel
             // 
-            PointLabel.AutoSize = true;
-            PointLabel.Font = new Font("Segoe UI", 14F);
-            PointLabel.Location = new Point(20, 20);
-            PointLabel.Name = "PointLabel";
-            PointLabel.Size = new Size(100, 25);
-            PointLabel.TabIndex = 5;
-            PointLabel.Text = "PointLabel";
+            PointsLabel.AutoSize = true;
+            PointsLabel.Font = new Font("Segoe UI", 14F);
+            PointsLabel.Location = new Point(20, 20);
+            PointsLabel.Name = "PointsLabel";
+            PointsLabel.Size = new Size(100, 25);
+            PointsLabel.TabIndex = 5;
+            PointsLabel.Text = "PointLabel";
             // 
             // SoundNameDisplay
             // 
@@ -152,7 +155,7 @@
             // TimesInput
             // 
             TimesInput.Font = new Font("Segoe UI", 14F);
-            TimesInput.Location = new Point(31, 145);
+            TimesInput.Location = new Point(20, 144);
             TimesInput.Name = "TimesInput";
             TimesInput.PlaceholderText = "Liczba";
             TimesInput.Size = new Size(75, 32);
@@ -162,11 +165,11 @@
             // 
             HowPointsWork.AutoSize = true;
             HowPointsWork.Font = new Font("Segoe UI", 18F);
-            HowPointsWork.Location = new Point(31, 284);
+            HowPointsWork.Location = new Point(31, 249);
             HowPointsWork.Name = "HowPointsWork";
-            HowPointsWork.Size = new Size(725, 32);
+            HowPointsWork.Size = new Size(730, 192);
             HowPointsWork.TabIndex = 13;
-            HowPointsWork.Text = "Punktacja: od zdobytych punktów odejmowane są stracone punkty";
+            HowPointsWork.Text = "Punktacja: od zdobytych punktów odejmowane są stracone punkty.\r\nSkróty klawiaturowe:\r\n\r\nR - powtórzenie bieżącego dźwięku\r\nQ - odtworzenie dźwięku A\r\nEnter - sprawdzenie odpowiedzi\r\n";
             // 
             // label1
             // 
@@ -178,11 +181,45 @@
             label1.TabIndex = 14;
             label1.Text = "Liczba dźwięków";
             // 
+            // FinalPointsLabel
+            // 
+            FinalPointsLabel.AutoSize = true;
+            FinalPointsLabel.Font = new Font("Segoe UI", 16F);
+            FinalPointsLabel.Location = new Point(309, 201);
+            FinalPointsLabel.Name = "FinalPointsLabel";
+            FinalPointsLabel.Size = new Size(165, 30);
+            FinalPointsLabel.TabIndex = 15;
+            FinalPointsLabel.Text = "FinalPointsLabel";
+            // 
+            // IntervalInput
+            // 
+            IntervalInput.Font = new Font("Segoe UI", 14F);
+            IntervalInput.Location = new Point(330, 68);
+            IntervalInput.MaxLength = 5;
+            IntervalInput.Name = "IntervalInput";
+            IntervalInput.PlaceholderText = "Interwał";
+            IntervalInput.Size = new Size(84, 32);
+            IntervalInput.TabIndex = 16;
+            // 
+            // ChangeGameModeButton
+            // 
+            ChangeGameModeButton.Font = new Font("Segoe UI", 14F);
+            ChangeGameModeButton.Location = new Point(621, 199);
+            ChangeGameModeButton.Name = "ChangeGameModeButton";
+            ChangeGameModeButton.Size = new Size(102, 32);
+            ChangeGameModeButton.TabIndex = 17;
+            ChangeGameModeButton.Text = "Interwały";
+            ChangeGameModeButton.UseVisualStyleBackColor = true;
+            ChangeGameModeButton.Click += OnChangeGameMode;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(ChangeGameModeButton);
+            Controls.Add(IntervalInput);
+            Controls.Add(FinalPointsLabel);
             Controls.Add(label1);
             Controls.Add(HowPointsWork);
             Controls.Add(TimesInput);
@@ -192,10 +229,10 @@
             Controls.Add(Replay);
             Controls.Add(LostPointsLabel);
             Controls.Add(SoundNameDisplay);
-            Controls.Add(PointLabel);
+            Controls.Add(PointsLabel);
             Controls.Add(CheckButton);
             Controls.Add(SoundInput);
-            Controls.Add(PlayButton);
+            Controls.Add(PlaySoundButton);
             MaximizeBox = false;
             Name = "Form1";
             Text = "Dyktando-inator";
@@ -205,10 +242,10 @@
         }
 
         #endregion
-        private Button PlayButton;
+        private Button PlaySoundButton;
         private TextBox SoundInput;
         private Button CheckButton;
-        private Label PointLabel;
+        private Label PointsLabel;
         private Label SoundNameDisplay;
         private Label LostPointsLabel;
         private Button Replay;
@@ -218,5 +255,8 @@
         private TextBox TimesInput;
         private Label HowPointsWork;
         private Label label1;
+        private Label FinalPointsLabel;
+        private TextBox IntervalInput;
+        private Button ChangeGameModeButton;
     }
 }
