@@ -118,7 +118,7 @@ namespace Dictations.Interfaces
             
             var difference = Math.Abs(firstSoundId - secondSoundId);
 
-            if (difference > 12)
+            while (difference > 12)
             {
                 difference -= 12;
             }

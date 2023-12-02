@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             PlaySoundButton = new Button();
             SoundInput = new TextBox();
             CheckButton = new Button();
@@ -296,9 +297,10 @@
             Controls.Add(CheckButton);
             Controls.Add(SoundInput);
             Controls.Add(PlaySoundButton);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             Name = "Form1";
-            Text = "Dyktando-inator";
+            Text = "Dyktando-inator (© Jerzy Chmiel 2023)";
             KeyDown += KeyBinding;
             ResumeLayout(false);
             PerformLayout();
